@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ATSify — Beat the Bots. Land the Job.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">
+        <span class="logo-icon">⬡</span>
+        ATSify
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How it Works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <span class="theme-icon">☀</span>
+        </button>
+        <a href="#upload" class="btn btn-ghost">Sign In</a>
+        <a href="#upload" class="btn btn-primary">Try Free</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO SECTION
+  ============================================================ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="grid-overlay"></div>
+      <div class="glow glow-1"></div>
+      <div class="glow glow-2"></div>
+      <div class="glow glow-3"></div>
+    </div>
+    <div class="container">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Trusted by 50,000+ job seekers
+      </div>
+      <h1 class="hero-title">
+        Beat the Bots.<br />
+        <span class="gradient-text">Land the Job.</span>
+      </h1>
+      <p class="hero-subtitle">
+        ATSify scans your resume against any job description, gives you an ATS score,
+        highlights missing keywords, and tells you exactly what to fix — in seconds.
+      </p>
+      <div class="hero-cta">
+        <a href="#upload" class="btn btn-primary btn-lg">
+          Analyze My Resume
+          <span class="btn-arrow">→</span>
+        </a>
+        <a href="#how-it-works" class="btn btn-ghost btn-lg">See How It Works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-value">94%</span>
+          <span class="stat-label">Interview Rate Boost</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-value">50K+</span>
+          <span class="stat-label">Resumes Analyzed</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-value">&lt;10s</span>
+          <span class="stat-label">Analysis Time</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- floating cards -->
+    <div class="hero-floats">
+      <div class="float-card float-card-1">
+        <div class="float-icon">✓</div>
+        <div>
+          <div class="float-title">ATS Score</div>
+          <div class="float-val">87/100</div>
+        </div>
+      </div>
+      <div class="float-card float-card-2">
+        <div class="float-icon">⚡</div>
+        <div>
+          <div class="float-title">Keywords Found</div>
+          <div class="float-val">24 / 31</div>
+        </div>
+      </div>
+      <div class="float-card float-card-3">
+        <div class="float-icon">▲</div>
+        <div>
+          <div class="float-title">Match Rate</div>
+          <div class="float-val">78%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       UPLOAD SECTION
+  ============================================================ -->
+  <section class="upload-section" id="upload">
+    <div class="container">
+      <div class="section-label">Resume Analyzer</div>
+      <h2 class="section-title">Drop Your Resume. Get Instant Insights.</h2>
+      <p class="section-sub">Upload your resume + paste a job description. We do the rest.</p>
+
+      <div class="upload-grid">
+        <!-- Upload Box -->
+        <div class="upload-box" id="uploadBox">
+          <div class="upload-inner" id="uploadInner">
+            <div class="upload-icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                <path d="M24 32V16M24 16L18 22M24 16L30 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="8" y="36" width="32" height="4" rx="2" fill="currentColor" opacity=".2"/>
+              </svg>
+            </div>
+            <div class="upload-text">
+              <strong>Drag & drop your resume</strong>
+              <span>PDF, DOC, DOCX — max 5MB</span>
+            </div>
+            <label class="btn btn-primary btn-sm upload-btn">
+              Browse Files
+              <input type="file" id="fileInput" accept=".pdf,.doc,.docx" hidden />
+            </label>
+          </div>
+          <div class="upload-done" id="uploadDone" style="display:none;">
+            <div class="done-icon">✓</div>
+            <p id="uploadedFileName">resume.pdf</p>
+            <button class="btn btn-ghost btn-sm" id="removeFile">Remove</button>
+          </div>
+          <div class="upload-progress" id="uploadProgress" style="display:none;">
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+            <span id="progressLabel">Uploading… 0%</span>
+          </div>
+        </div>
+
+        <!-- Job Description -->
+        <div class="jd-box">
+          <label class="jd-label">Job Description</label>
+          <textarea
+            id="jobDesc"
+            class="jd-textarea"
+            placeholder="Paste the job description here…&#10;&#10;e.g. 'We are looking for a Senior Frontend Developer with experience in React, TypeScript, Node.js…'"
+          ></textarea>
+          <button class="btn btn-primary btn-full" id="analyzeBtn">
+            <span id="analyzeBtnText">Analyze Resume →</span>
+            <span id="analyzeBtnLoader" style="display:none;">
+              <span class="spinner"></span> Analyzing…
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DASHBOARD SECTION
+  ============================================================ -->
+  <section class="dashboard-section" id="dashboard" style="display:none;">
+    <div class="container">
+      <div class="section-label">ATS Results</div>
+      <h2 class="section-title">Your Resume Analysis</h2>
+
+      <!-- Top Cards Row -->
+      <div class="dash-top">
+        <!-- Score Circle -->
+        <div class="dash-card score-card">
+          <h3 class="card-title">ATS Score</h3>
+          <div class="score-circle-wrap">
+            <svg class="score-svg" viewBox="0 0 120 120">
+              <circle class="score-bg" cx="60" cy="60" r="52" />
+              <circle class="score-ring" cx="60" cy="60" r="52" id="scoreRing" />
+            </svg>
+            <div class="score-number">
+              <span id="scoreDisplay">0</span>
+              <small>/100</small>
+            </div>
+          </div>
+          <div class="score-badge" id="scoreBadge">Analyzing…</div>
+        </div>
+
+        <!-- Match + Health -->
+        <div class="dash-metrics">
+          <div class="metric-card" id="matchCard">
+            <div class="metric-icon">🎯</div>
+            <div>
+              <div class="metric-label">Job Match</div>
+              <div class="metric-value" id="matchVal">0%</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-bar-fill" id="matchBar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="metric-card" id="keywordCard">
+            <div class="metric-icon">🔑</div>
+            <div>
+              <div class="metric-label">Keywords Matched</div>
+              <div class="metric-value" id="keywordVal">0 / 0</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-bar-fill" id="keywordBar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="metric-card" id="readCard">
+            <div class="metric-icon">📄</div>
+            <div>
+              <div class="metric-label">Readability</div>
+              <div class="metric-value" id="readVal">0%</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-bar-fill" id="readBar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="metric-card" id="formatCard">
+            <div class="metric-icon">✦</div>
+            <div>
+              <div class="metric-label">Format Score</div>
+              <div class="metric-value" id="formatVal">0%</div>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-bar-fill" id="formatBar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="dash-bottom">
+        <!-- Skills -->
+        <div class="dash-card skills-card">
+          <h3 class="card-title">Skills Analysis</h3>
+          <div class="skills-list" id="skillsList"></div>
+        </div>
+
+        <!-- Missing Keywords -->
+        <div class="dash-card missing-card">
+          <h3 class="card-title">Missing Keywords</h3>
+          <div class="tag-list" id="missingTags"></div>
+        </div>
+
+        <!-- Suggestions -->
+        <div class="dash-card suggestions-card">
+          <h3 class="card-title">Suggestions</h3>
+          <div class="suggestions-list" id="suggestionsList"></div>
+        </div>
+      </div>
+
+      <div class="dash-actions">
+        <button class="btn btn-primary" id="downloadReport">Download Report</button>
+        <button class="btn btn-ghost" id="reanalyze">Analyze Another →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FEATURES SECTION
+  ============================================================ -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="section-label">Why ATSify</div>
+      <h2 class="section-title">Everything You Need to <span class="gradient-text">Get Past ATS</span></h2>
+      <p class="section-sub">Built for modern job seekers who refuse to get filtered out by robots.</p>
+
+      <div class="features-grid">
+        <div class="feature-card feature-large">
+          <div class="feat-icon">⬡</div>
+          <h3>Real-Time ATS Scoring</h3>
+          <p>Get an instant compatibility score out of 100, calibrated against real ATS systems used by Fortune 500 companies.</p>
+          <div class="feat-preview">
+            <div class="mini-score">87</div>
+            <div class="mini-label">ATS Compatible</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">🔑</div>
+          <h3>Keyword Gap Analysis</h3>
+          <p>See exactly which keywords are missing from your resume compared to the job posting.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">📊</div>
+          <h3>Skills Match Chart</h3>
+          <p>Visual breakdown of how your skills stack up. Know what to add before you apply.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">✦</div>
+          <h3>Format Optimizer</h3>
+          <p>Detect formatting errors that trip up ATS parsers — tables, columns, fonts, encoding.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feat-icon">⚡</div>
+          <h3>One-Click Suggestions</h3>
+          <p>Actionable, prioritized fixes. Not vague advice — specific phrases you can add right now.</p>
+        </div>
+        <div class="feature-card feature-large">
+          <div class="feat-icon">🎯</div>
+          <h3>Job Description Parser</h3>
+          <p>Paste any JD and our AI extracts the exact requirements, weights them by importance, and maps them to your resume.</p>
+          <div class="feat-tags">
+            <span class="tag tag-green">React</span>
+            <span class="tag tag-green">TypeScript</span>
+            <span class="tag tag-yellow">Node.js</span>
+            <span class="tag tag-red">AWS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS
+  ============================================================ -->
+  <section class="workflow-section" id="how-it-works">
+    <div class="container">
+      <div class="section-label">Process</div>
+      <h2 class="section-title">From Upload to <span class="gradient-text">Interview-Ready</span></h2>
+      <div class="workflow-steps">
+        <div class="workflow-step">
+          <div class="step-number">01</div>
+          <div class="step-body">
+            <div class="step-icon">📎</div>
+            <h3>Upload Your Resume</h3>
+            <p>Drag & drop or browse — PDF, DOC, or DOCX. Takes 3 seconds.</p>
+          </div>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step">
+          <div class="step-number">02</div>
+          <div class="step-body">
+            <div class="step-icon">📋</div>
+            <h3>Paste Job Description</h3>
+            <p>Copy the JD from LinkedIn, Indeed, or the company site. Paste it in.</p>
+          </div>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step">
+          <div class="step-number">03</div>
+          <div class="step-body">
+            <div class="step-icon">🤖</div>
+            <h3>AI Analyzes Everything</h3>
+            <p>Our engine compares, scores, and identifies gaps in under 10 seconds.</p>
+          </div>
+        </div>
+        <div class="workflow-connector"></div>
+        <div class="workflow-step">
+          <div class="step-number">04</div>
+          <div class="step-body">
+            <div class="step-icon">🚀</div>
+            <h3>Fix & Apply</h3>
+            <p>Implement our suggestions and land in the human review pile — not the trash.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRICING SECTION
+  ============================================================ -->
+  <section class="pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Simple, Transparent <span class="gradient-text">Pricing</span></h2>
+      <p class="section-sub">No hidden fees. Cancel anytime. Land the job or get your money back.</p>
+
+      <div class="pricing-toggle">
+        <span>Monthly</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="billingToggle" />
+          <span class="toggle-slider"></span>
+        </label>
+        <span>Annual <span class="save-badge">Save 40%</span></span>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">
+            <span class="price-amount">$0</span>
+            <span class="price-period">/mo</span>
+          </div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> 3 Resume Scans / Month</li>
+            <li><span class="check">✓</span> Basic ATS Score</li>
+            <li><span class="check">✓</span> Keyword Highlights</li>
+            <li><span class="x">✗</span> Skills Gap Analysis</li>
+            <li><span class="x">✗</span> Downloadable Report</li>
+            <li><span class="x">✗</span> Priority Support</li>
+          </ul>
+          <a href="#upload" class="btn btn-ghost btn-full">Get Started Free</a>
+        </div>
+
+        <div class="pricing-card pricing-popular">
+          <div class="popular-badge">Most Popular</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">
+            <span class="price-amount" data-monthly="19" data-annual="11">$19</span>
+            <span class="price-period">/mo</span>
+          </div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Unlimited Resume Scans</li>
+            <li><span class="check">✓</span> Full ATS Score Breakdown</li>
+            <li><span class="check">✓</span> Skills Gap Analysis</li>
+            <li><span class="check">✓</span> Keyword Suggestions</li>
+            <li><span class="check">✓</span> Downloadable PDF Report</li>
+            <li><span class="check">✓</span> Email Support</li>
+          </ul>
+          <a href="#upload" class="btn btn-primary btn-full">Start Pro — Free Trial</a>
+        </div>
+
+        <div class="pricing-card">
+          <div class="plan-name">Team</div>
+          <div class="plan-price">
+            <span class="price-amount" data-monthly="49" data-annual="29">$49</span>
+            <span class="price-period">/mo</span>
+          </div>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Up to 10 Team Members</li>
+            <li><span class="check">✓</span> Everything in Pro</li>
+            <li><span class="check">✓</span> Bulk Resume Analysis</li>
+            <li><span class="check">✓</span> Team Dashboard</li>
+            <li><span class="check">✓</span> Priority Support</li>
+            <li><span class="check">✓</span> API Access</li>
+          </ul>
+          <a href="#upload" class="btn btn-ghost btn-full">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TESTIMONIALS
+  ============================================================ -->
+  <section class="testimonials-section" id="testimonials">
+    <div class="container">
+      <div class="section-label">Reviews</div>
+      <h2 class="section-title">People Getting <span class="gradient-text">Hired</span></h2>
+
+      <div class="testimonials-grid">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>"I applied to 30 jobs and got zero responses. Used ATSify, rewrote my resume with the suggestions, and got 4 interviews in the next week."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">SR</div>
+            <div>
+              <strong>Sofia R.</strong>
+              <span>Frontend Developer @ Shopify</span>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card testi-featured">
+          <div class="testi-stars">★★★★★</div>
+          <p>"The keyword gap analysis is genuinely insane. It found 12 terms I was missing that were right in the JD. Added them in 10 minutes, got a callback 2 days later."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">MJ</div>
+            <div>
+              <strong>Marcus J.</strong>
+              <span>Data Engineer @ Stripe</span>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>"As a career coach I recommend ATSify to every client. It replaces hours of manual JD analysis with a 10-second scan. Worth every penny."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">AL</div>
+            <div>
+              <strong>Aisha L.</strong>
+              <span>Career Coach, 8 yrs exp</span>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>"Went from a 38 ATS score to 91 by following the suggestions. Got my dream PM role at a FAANG company. Couldn't have done it without this tool."</p>
+          <div class="testi-author">
+            <div class="testi-avatar">KP</div>
+            <div>
+              <strong>Karan P.</strong>
+              <span>Product Manager @ Meta</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FAQ SECTION
+  ============================================================ -->
+  <section class="faq-section" id="faq">
+    <div class="container faq-container">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Common <span class="gradient-text">Questions</span></h2>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-q">
+            What is an ATS and why does it matter?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">
+            <p>ATS stands for Applicant Tracking System — software used by 99% of Fortune 500 companies to automatically filter resumes before a human sees them. If your resume isn't ATS-optimized, it gets rejected before anyone reads it. ATSify helps you pass this filter.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">
+            Is my resume data kept private?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">
+            <p>Yes. We do not store your resume data after analysis is complete. Your files are processed in-memory and discarded. We never train models on your data or share it with third parties.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">
+            What file types do you support?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">
+            <p>We support PDF, DOC, and DOCX files up to 5MB. PDF is recommended for best results since it's the most consistent format for ATS parsing.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">
+            How accurate is the ATS score?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">
+            <p>Our scoring engine is trained on data from real ATS systems including Workday, Greenhouse, Lever, and iCIMS. It accurately predicts compatibility 94% of the time based on user feedback and interview outcome data.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">
+            Can I use ATSify for multiple job applications?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">
+            <p>Absolutely — this is the recommended workflow. Run your resume against every job description you apply to, since each JD has different keyword requirements. Pro users get unlimited scans.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA BANNER
+  ============================================================ -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card">
+        <div class="cta-glow"></div>
+        <h2>Your next interview is one upload away.</h2>
+        <p>Join 50,000+ job seekers who stopped getting ghosted.</p>
+        <a href="#upload" class="btn btn-primary btn-lg">Analyze My Resume — Free</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <span class="logo-icon">⬡</span> ATSify
+          </a>
+          <p>AI-powered resume analysis that helps you beat ATS filters and get more interviews.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="LinkedIn">in</a>
+            <a href="#" aria-label="GitHub">⌥</a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#upload">Resume Analyzer</a></li>
+            <li><a href="#">Changelog</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Resume Templates</a></li>
+            <li><a href="#">ATS Guide</a></li>
+            <li><a href="#">Career Tips</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 ATSify. Built with ♥ for job seekers everywhere.</p>
+        <p>Not affiliated with any ATS vendor.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
