@@ -1,0 +1,771 @@
+/* ============================================================
+   ATSify — script.js
+   All interactive features: upload, dashboard, animations,
+   dark/light toggle, mobile menu, FAQ, pricing toggle, scroll
+   ============================================================ */
+
+'use strict';
+
+/* ── Utility ─────────────────────────────────────────────────── */
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+
+/* ============================================================
+   1. NAVBAR — scroll effect + mobile menu
+============================================================ */
+const navbar   = $('#navbar');
+const hamburger = $('#hamburger');
+const navLinks  = $('#navLinks');
+
+// Add scrolled class when page scrolls
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+// Mobile hamburger toggle
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  navLinks.classList.toggle('open');
+});
+
+// Close mobile menu when a link is clicked
+navLinks.addEventListener('click', e => {
+  if (e.target.tagName === 'A') {
+    hamburger.classList.remove('open');
+    navLinks.classList.remove('open');
+  }
+});
+
+/* ============================================================
+   2. DARK / LIGHT THEME TOGGLE
+============================================================ */
+const themeToggle = $('#themeToggle');
+const themeIcon   = themeToggle.querySelector('.theme-icon');
+const html        = document.documentElement;
+
+// Load saved theme
+const savedTheme = localStorage.getItem('atsify-theme') || 'dark';
+html.setAttribute('data-theme', savedTheme);
+themeIcon.textContent = savedTheme === 'dark' ? '☀' : '☾';
+
+themeToggle.addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  const next    = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  themeIcon.textContent = next === 'dark' ? '☀' : '☾';
+  localStorage.setItem('atsify-theme', next);
+});
+
+/* ============================================================
+   3. SMOOTH SCROLL for anchor links
+============================================================ */
+document.addEventListener('click', e => {
+  const link = e.target.closest('a[href^="#"]');
+  if (!link) return;
+  const target = $(link.getAttribute('href'));
+  if (!target) return;
+  e.preventDefault();
+  const navH = parseInt(getComputedStyle(html).getPropertyValue('--nav-h')) || 72;
+  window.scrollTo({
+    top: target.offsetTop - navH - 12,
+    behavior: 'smooth'
+  });
+});
+
+/* ============================================================
+   4. SCROLL REVEAL ANIMATION
+============================================================ */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+// Add reveal class to elements
+function setupReveal() {
+  const selectors = [
+    '.feature-card',
+    '.workflow-step',
+    '.pricing-card',
+    '.testi-card',
+    '.faq-item',
+    '.dash-card',
+    '.metric-card',
+    '.upload-box',
+    '.jd-box'
+  ];
+  selectors.forEach(sel => {
+    $$(sel).forEach((el, i) => {
+      el.classList.add('reveal');
+      // stagger delay for grids
+      if (i % 4 === 1) el.classList.add('reveal-delay-1');
+      if (i % 4 === 2) el.classList.add('reveal-delay-2');
+      if (i % 4 === 3) el.classList.add('reveal-delay-3');
+      revealObserver.observe(el);
+    });
+  });
+}
+setupReveal();
+
+/* ============================================================
+   5. DRAG & DROP RESUME UPLOAD
+============================================================ */
+const uploadBox      = $('#uploadBox');
+const uploadInner    = $('#uploadInner');
+const uploadDone     = $('#uploadDone');
+const uploadProgress = $('#uploadProgress');
+const fileInput      = $('#fileInput');
+const progressFill   = $('#progressFill');
+const progressLabel  = $('#progressLabel');
+const uploadedName   = $('#uploadedFileName');
+const removeFileBtn  = $('#removeFile');
+
+let uploadedFile = null;
+
+// Show upload done state
+function showDone(file) {
+  uploadedFile = file;
+  uploadedName.textContent = file.name;
+  uploadInner.style.display    = 'none';
+  uploadProgress.style.display = 'none';
+  uploadDone.style.display     = 'flex';
+}
+
+// Simulate upload progress animation
+function simulateUpload(file) {
+  uploadInner.style.display    = 'none';
+  uploadDone.style.display     = 'none';
+  uploadProgress.style.display = 'flex';
+  progressFill.style.width     = '0%';
+
+  let pct = 0;
+  const iv = setInterval(() => {
+    pct += Math.random() * 18 + 5;
+    if (pct >= 100) {
+      pct = 100;
+      clearInterval(iv);
+      progressFill.style.width = '100%';
+      progressLabel.textContent = 'Upload complete!';
+      setTimeout(() => showDone(file), 500);
+    }
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = `Uploading… ${Math.floor(pct)}%`;
+  }, 120);
+}
+
+// Validate file
+function validateFile(file) {
+  const allowed = ['application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  if (!allowed.includes(file.type) &&
+      !file.name.match(/\.(pdf|doc|docx)$/i)) {
+    showToast('Only PDF, DOC, or DOCX files are allowed.', 'error');
+    return false;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('File must be under 5MB.', 'error');
+    return false;
+  }
+  return true;
+}
+
+// File input change
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file && validateFile(file)) simulateUpload(file);
+});
+
+// Drag events
+uploadBox.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadBox.classList.add('drag-over');
+});
+uploadBox.addEventListener('dragleave', () => {
+  uploadBox.classList.remove('drag-over');
+});
+uploadBox.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadBox.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && validateFile(file)) simulateUpload(file);
+});
+
+// Remove uploaded file
+removeFileBtn.addEventListener('click', () => {
+  uploadedFile = null;
+  fileInput.value = '';
+  uploadDone.style.display  = 'none';
+  uploadInner.style.display = 'flex';
+});
+
+/* ============================================================
+   6. ANALYZE BUTTON — show dashboard with animated results
+============================================================ */
+const analyzeBtn      = $('#analyzeBtn');
+const analyzeBtnText  = $('#analyzeBtnText');
+const analyzeBtnLoader= $('#analyzeBtnLoader');
+const dashboardSection= $('#dashboard');
+
+/* ============================================================
+   SMART MOCK AI ENGINE
+   Reads actual Job Description text and generates
+   dynamic, realistic results every single time
+============================================================ */
+
+// Master keyword database
+const KEYWORD_DB = {
+  'React':          ['react','reactjs','react.js'],
+  'Next.js':        ['next.js','nextjs','next js'],
+  'Vue.js':         ['vue','vuejs','vue.js'],
+  'Angular':        ['angular','angularjs'],
+  'TypeScript':     ['typescript',' ts '],
+  'JavaScript':     ['javascript',' js ','es6'],
+  'HTML/CSS':       ['html','css','sass','scss'],
+  'Tailwind CSS':   ['tailwind','tailwindcss'],
+  'Node.js':        ['node.js','nodejs',' node '],
+  'Python':         ['python','django','flask','fastapi'],
+  'Java':           ['java','spring boot','springboot'],
+  'PHP':            ['php','laravel'],
+  'Ruby':           ['ruby on rails','ruby'],
+  'Go / Golang':    ['golang',' go '],
+  'PostgreSQL':     ['postgresql','postgres'],
+  'MySQL':          ['mysql'],
+  'MongoDB':        ['mongodb','mongo'],
+  'Redis':          ['redis'],
+  'GraphQL':        ['graphql'],
+  'AWS':            ['aws','amazon web services','ec2','lambda'],
+  'Docker':         ['docker','containerization'],
+  'Kubernetes':     ['kubernetes','k8s'],
+  'CI/CD':          ['ci/cd','cicd','jenkins','github actions'],
+  'Linux':          ['linux','unix','bash shell'],
+  'Agile/Scrum':    ['agile','scrum','sprint','jira'],
+  'REST API':       ['rest api','restful','api design'],
+  'Microservices':  ['microservices','micro services'],
+  'Git':            ['git','github','gitlab'],
+  'Testing':        ['jest','unit test','pytest','cypress','tdd'],
+  'Communication':  ['communication','collaboration','teamwork'],
+  'Leadership':     ['leadership',' lead ','mentor'],
+  'Data Analysis':  ['data analysis','tableau','power bi'],
+  'Machine Learning':['machine learning','ml model','tensorflow','pytorch'],
+  'SQL':            [' sql ','database queries','stored procedure'],
+  'Figma/UI':       ['figma','ui/ux','wireframe','prototype'],
+};
+
+// Suggestion pool
+const SUGGESTION_POOL = [
+  { level:'high',   text:'Quantify achievements — "Reduced page load by 40%" is far stronger than "Improved performance".' },
+  { level:'high',   text:'Mirror the exact job title from the JD in your resume headline for better ATS matching.' },
+  { level:'high',   text:'Add a dedicated "Technical Skills" section near the top — ATS scanners prioritize it.' },
+  { level:'medium', text:'Start every bullet with a strong action verb: "Built", "Shipped", "Led", "Architected".' },
+  { level:'medium', text:'Keep resume to 1–2 pages — some ATS systems silently truncate longer files.' },
+  { level:'medium', text:'Avoid tables and multi-column layouts — ATS parsers often misread them.' },
+  { level:'medium', text:'Add a 3–4 line professional summary at the top that mirrors the role requirements.' },
+  { level:'medium', text:'Spell out acronyms once — e.g. "Artificial Intelligence (AI)" for full keyword coverage.' },
+  { level:'low',    text:'Use standard fonts (Arial, Calibri) — decorative fonts can confuse ATS parsers.' },
+  { level:'low',    text:'Save as PDF — it preserves formatting consistently across all ATS platforms.' },
+  { level:'low',    text:'Move contact info out of headers/footers — many ATS systems skip those sections.' },
+  { level:'low',    text:'Include relevant certifications even if expired — they carry keyword weight.' },
+];
+
+// Core function: analyze JD and return dynamic results
+function analyzeJD(jdText) {
+  const jdLower = ' ' + jdText.toLowerCase() + ' ';
+
+  // Step 1: which keywords exist in JD?
+  const inJD  = [];
+  const notJD = [];
+  Object.entries(KEYWORD_DB).forEach(([label, variants]) => {
+    variants.some(v => jdLower.includes(v)) ? inJD.push(label) : notJD.push(label);
+  });
+
+  // Step 2: simulate resume having 55-78% of JD keywords
+  const jdSlice    = inJD.slice(0, Math.min(inJD.length, 8 + Math.floor(Math.random() * 6)));
+  const matchRatio = 0.55 + Math.random() * 0.23;
+  const foundCount = Math.max(1, Math.round(jdSlice.length * matchRatio));
+  const resumeHas  = jdSlice.slice(0, foundCount);
+  const resumeMiss = jdSlice.slice(foundCount);
+
+  // Step 3: build skill rows
+  const skills = resumeHas.slice(0, 6).map(name => {
+    const pct = 58 + Math.floor(Math.random() * 40);
+    return { name, pct, level: pct >= 80 ? 'high' : pct >= 60 ? 'medium' : 'low' };
+  });
+  const fallback = [
+    { name:'Communication',   pct: 75+Math.floor(Math.random()*20), level:'medium' },
+    { name:'Problem Solving', pct: 80+Math.floor(Math.random()*15), level:'high'   },
+    { name:'Git',             pct: 85+Math.floor(Math.random()*12), level:'high'   },
+  ];
+  while (skills.length < 6) skills.push(fallback[skills.length % 3]);
+
+  // Step 4: scores
+  const matchPct    = Math.round(matchRatio * 100);
+  const atsScore    = Math.min(97, Math.round(42 + matchPct * 0.52 + Math.random() * 7));
+  const readability = 68 + Math.floor(Math.random() * 28);
+  const format      = 70 + Math.floor(Math.random() * 26);
+
+  // Step 5: missing keywords
+  const missing = resumeMiss.length >= 3
+    ? resumeMiss
+    : [...resumeMiss, ...notJD.slice(0, 6 - resumeMiss.length)];
+
+  // Step 6: suggestions (random pick + specific missing keyword tip)
+  const suggestions = [...SUGGESTION_POOL].sort(() => Math.random() - 0.5).slice(0, 4);
+  if (missing.length > 0) {
+    suggestions.unshift({
+      level: 'high',
+      text: `Add these high-impact keywords from the JD: "${missing.slice(0,3).join('", "')}" — they appear multiple times.`
+    });
+  }
+
+  return { score: atsScore, match: matchPct,
+    keywords: { found: foundCount, total: jdSlice.length || 8 },
+    readability, format, skills,
+    missing: missing.slice(0, 8),
+    suggestions: suggestions.slice(0, 5)
+  };
+}
+
+// Thinking messages shown during analysis
+const thinkingSteps = [
+  'Parsing resume structure…',
+  'Extracting keywords from JD…',
+  'Matching skills & experience…',
+  'Calculating ATS compatibility…',
+  'Generating smart suggestions…',
+];
+
+analyzeBtn.addEventListener('click', () => {
+  if (!uploadedFile) {
+    showToast('Please upload your resume first.', 'error');
+    uploadBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  const jd = $('#jobDesc').value.trim();
+  if (jd.length < 30) {
+    showToast('Please paste a job description (min 30 characters).', 'error');
+    return;
+  }
+
+  // Show loader
+  analyzeBtnText.style.display   = 'none';
+  analyzeBtnLoader.style.display = 'inline-flex';
+  analyzeBtn.disabled = true;
+
+  // Cycle through thinking steps as toasts
+  let stepIdx = 0;
+  const stepIv = setInterval(() => {
+    if (stepIdx < thinkingSteps.length) showToast(thinkingSteps[stepIdx++], 'info');
+  }, 500);
+
+  setTimeout(() => {
+    clearInterval(stepIv);
+    analyzeBtnText.style.display   = 'inline';
+    analyzeBtnLoader.style.display = 'none';
+    analyzeBtn.disabled = false;
+
+    const results = analyzeJD(jd);
+    dashboardSection.style.display = 'block';
+    renderDashboard(results);
+
+    setTimeout(() => {
+      const navH = parseInt(getComputedStyle(html).getPropertyValue('--nav-h')) || 72;
+      window.scrollTo({ top: dashboardSection.offsetTop - navH - 12, behavior: 'smooth' });
+    }, 100);
+
+    showToast('Analysis complete! 🎉', 'success');
+  }, 2800);
+});
+
+
+/* ============================================================
+   7. RENDER DASHBOARD with animations
+============================================================ */
+function renderDashboard(data) {
+  // ── Score circle ──
+  animateScore(data.score);
+
+  // ── Metrics ──
+  setTimeout(() => {
+    animateMetric('matchVal',   'matchBar',   data.match,                       '%');
+    animateMetric('keywordVal', 'keywordBar', Math.round(data.keywords.found / data.keywords.total * 100), '%', `${data.keywords.found} / ${data.keywords.total}`);
+    animateMetric('readVal',    'readBar',    data.readability,                  '%');
+    animateMetric('formatVal',  'formatBar',  data.format,                       '%');
+  }, 400);
+
+  // ── Skills ──
+  setTimeout(() => renderSkills(data.skills), 600);
+
+  // ── Missing keywords ──
+  setTimeout(() => renderMissingTags(data.missing), 700);
+
+  // ── Suggestions ──
+  setTimeout(() => renderSuggestions(data.suggestions), 800);
+
+  // Observe new dashboard cards
+  $$('.dash-card, .metric-card').forEach(el => {
+    el.classList.add('reveal');
+    revealObserver.observe(el);
+  });
+}
+
+/* Animated score ring */
+function animateScore(target) {
+  const ring        = $('#scoreRing');
+  const display     = $('#scoreDisplay');
+  const badge       = $('#scoreBadge');
+  const circumference = 327; // 2π × 52
+
+  // inject SVG gradient
+  const svg = ring.closest('svg');
+  if (!svg.querySelector('defs')) {
+    svg.insertAdjacentHTML('afterbegin', `
+      <defs>
+        <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#6c63ff"/>
+          <stop offset="50%"  stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#38bdf8"/>
+        </linearGradient>
+      </defs>
+    `);
+    ring.setAttribute('stroke', 'url(#scoreGrad)');
+  }
+
+  // Animate ring
+  const offset = circumference - (target / 100) * circumference;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  // Animate number counter
+  let current = 0;
+  const duration = 1500;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    current = Math.round(eased * target);
+    display.textContent = current;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Badge
+  setTimeout(() => {
+    badge.classList.remove('excellent', 'good', 'poor');
+    if (target >= 80) {
+      badge.textContent = '✦ Excellent';
+      badge.classList.add('excellent');
+    } else if (target >= 60) {
+      badge.textContent = '⚡ Good';
+      badge.classList.add('good');
+    } else {
+      badge.textContent = '⚠ Needs Work';
+      badge.classList.add('poor');
+    }
+  }, 1600);
+}
+
+/* Animated metric bar + value */
+function animateMetric(valId, barId, pct, suffix = '%', displayOverride = null) {
+  const valEl = $('#' + valId);
+  const barEl = $('#' + barId);
+
+  barEl.style.width = pct + '%';
+
+  // Counter
+  let current = 0;
+  const duration = 1200;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    current = Math.round(eased * pct);
+    valEl.textContent = displayOverride
+      ? displayOverride
+      : current + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+/* Render skills list */
+function renderSkills(skills) {
+  const list = $('#skillsList');
+  list.innerHTML = skills.map(s => `
+    <div class="skill-row">
+      <div class="skill-info">
+        <span class="skill-name">${s.name}</span>
+        <span class="skill-pct">${s.pct}%</span>
+      </div>
+      <div class="skill-track">
+        <div class="skill-fill ${s.level}" style="width:0%" data-pct="${s.pct}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // Animate fills
+  setTimeout(() => {
+    $$('.skill-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 100);
+}
+
+/* Render missing keyword tags */
+function renderMissingTags(keywords) {
+  const container = $('#missingTags');
+  container.innerHTML = keywords.map(k =>
+    `<span class="tag tag-red">${k}</span>`
+  ).join('');
+}
+
+/* Render suggestion cards */
+function renderSuggestions(suggestions) {
+  const list = $('#suggestionsList');
+  list.innerHTML = suggestions.map(s => `
+    <div class="suggestion-item sug-${s.level}">
+      <div class="sug-dot"></div>
+      <span>${s.text}</span>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   8. REANALYZE BUTTON
+============================================================ */
+$('#reanalyze').addEventListener('click', () => {
+  dashboardSection.style.display = 'none';
+  uploadedFile = null;
+  fileInput.value = '';
+  uploadDone.style.display  = 'none';
+  uploadInner.style.display = 'flex';
+  $('#jobDesc').value = '';
+  const navH = parseInt(getComputedStyle(html).getPropertyValue('--nav-h')) || 72;
+  window.scrollTo({
+    top: $('#upload').offsetTop - navH - 12,
+    behavior: 'smooth'
+  });
+});
+
+/* ============================================================
+   9. DOWNLOAD REPORT (simulated)
+============================================================ */
+$('#downloadReport').addEventListener('click', () => {
+  showToast('Generating PDF report…', 'info');
+  setTimeout(() => {
+    // Create a simple text report and trigger download
+    const report = `ATSify Resume Analysis Report
+================================
+Date: ${new Date().toLocaleDateString()}
+
+ATS SCORE: 82 / 100  ★ Excellent
+
+JOB MATCH:         78%
+KEYWORDS MATCHED:  22 / 29
+READABILITY:       91%
+FORMAT SCORE:      85%
+
+MISSING KEYWORDS
+----------------
+CI/CD Pipeline, Kubernetes, Agile/Scrum,
+REST API design, PostgreSQL, Redis, Jest Testing
+
+TOP SUGGESTIONS
+---------------
+[HIGH]   Add "CI/CD" and "Kubernetes" to your skills — they appear 5× in the JD.
+[HIGH]   Quantify achievements: "Reduced load time by 40%" beats "Improved performance".
+[MEDIUM] Mention Agile or Scrum — referenced in 3 of 5 JD bullets.
+[MEDIUM] Add a "Technical Summary" section at the top for faster ATS parsing.
+[LOW]    Replace generic verbs with action verbs: "architected", "led", "shipped".
+
+Generated by ATSify — atsify.ai
+`;
+    const blob = new Blob([report], { type: 'text/plain' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'ATSify_Report.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Report downloaded! ✓', 'success');
+  }, 1500);
+});
+
+/* ============================================================
+   10. FAQ ACCORDION
+============================================================ */
+$$('.faq-item').forEach(item => {
+  const btn = item.querySelector('.faq-q');
+  btn.addEventListener('click', () => {
+    const isOpen = item.classList.contains('open');
+    // Close all
+    $$('.faq-item').forEach(i => i.classList.remove('open'));
+    // Open clicked (unless it was already open)
+    if (!isOpen) item.classList.add('open');
+  });
+});
+
+/* ============================================================
+   11. PRICING TOGGLE — monthly / annual
+============================================================ */
+const billingToggle = $('#billingToggle');
+billingToggle.addEventListener('change', () => {
+  const annual = billingToggle.checked;
+  $$('.price-amount[data-monthly]').forEach(el => {
+    const from = parseInt(el.dataset.monthly);
+    const to   = parseInt(el.dataset.annual);
+    if (isNaN(from) || isNaN(to)) return;
+    animatePrice(el, annual ? to : from);
+  });
+});
+
+function animatePrice(el, target) {
+  const start    = parseInt(el.textContent) || 0;
+  const duration = 400;
+  const begin    = performance.now();
+  function tick(now) {
+    const t = Math.min((now - begin) / duration, 1);
+    el.textContent = '$' + Math.round(start + (target - start) * t);
+    if (t < 1) requestAnimationFrame(tick);
+    else el.textContent = '$' + target;
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ============================================================
+   12. TOAST NOTIFICATION
+============================================================ */
+function showToast(message, type = 'info') {
+  // Remove existing
+  const old = $('.atsify-toast');
+  if (old) old.remove();
+
+  const colors = {
+    success: '#22d3a0',
+    error:   '#f87171',
+    info:    '#6c63ff'
+  };
+  const icons = { success: '✓', error: '✗', info: '⚡' };
+
+  const toast = document.createElement('div');
+  toast.className = 'atsify-toast';
+  toast.innerHTML = `<span>${icons[type]}</span> ${message}`;
+  Object.assign(toast.style, {
+    position:       'fixed',
+    bottom:         '28px',
+    right:          '24px',
+    zIndex:         '9999',
+    display:        'flex',
+    alignItems:     'center',
+    gap:            '10px',
+    background:     'rgba(13,18,32,.95)',
+    backdropFilter: 'blur(16px)',
+    border:         `1px solid ${colors[type]}40`,
+    borderLeft:     `3px solid ${colors[type]}`,
+    color:          '#f0f4ff',
+    padding:        '14px 22px',
+    borderRadius:   '12px',
+    fontFamily:     "'DM Sans', sans-serif",
+    fontSize:       '.88rem',
+    boxShadow:      '0 8px 32px rgba(0,0,0,.5)',
+    opacity:        '0',
+    transform:      'translateY(16px)',
+    transition:     'all .3s cubic-bezier(.4,0,.2,1)',
+    maxWidth:       '340px',
+    lineHeight:     '1.5'
+  });
+  toast.querySelector('span').style.color = colors[type];
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity   = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity   = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 320);
+  }, 3800);
+}
+
+/* ============================================================
+   13. ACTIVE NAV LINK on scroll (highlight current section)
+============================================================ */
+const sections  = $$('section[id]');
+const navAnchors = $$('.nav-links a');
+
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navAnchors.forEach(a => a.classList.remove('active'));
+      const active = navAnchors.find(a => a.getAttribute('href') === '#' + entry.target.id);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+
+sections.forEach(s => sectionObserver.observe(s));
+
+// Style active nav link
+const style = document.createElement('style');
+style.textContent = `.nav-links a.active { color: var(--text); background: var(--surface); }`;
+document.head.appendChild(style);
+
+/* ============================================================
+   14. HERO BADGE — live counter animation on load
+============================================================ */
+window.addEventListener('load', () => {
+  // Animate hero stat numbers on page load
+  $$('.stat-value').forEach(el => {
+    const text = el.textContent;
+    const num  = parseFloat(text.replace(/[^0-9.]/g, ''));
+    if (isNaN(num) || num === 0) return;
+    const suffix = text.replace(/[0-9.]/g, '');
+    let start = performance.now();
+    const duration = 1800;
+    function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = (num < 10 ? (eased * num).toFixed(1) : Math.round(eased * num)) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = text; // restore original
+    }
+    requestAnimationFrame(tick);
+  });
+});
+
+/* ============================================================
+   15. PARALLAX — subtle hero glow movement on mouse
+============================================================ */
+const glows = $$('.glow');
+document.addEventListener('mousemove', e => {
+  const x = (e.clientX / window.innerWidth  - 0.5) * 30;
+  const y = (e.clientY / window.innerHeight - 0.5) * 30;
+  glows.forEach((g, i) => {
+    const factor = (i + 1) * 0.4;
+    g.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+  });
+}, { passive: true });
+
+/* ============================================================
+   16. FLOATING CARDS — stagger on load
+============================================================ */
+$$('.float-card').forEach((card, i) => {
+  card.style.opacity   = '0';
+  card.style.transform = 'translateX(40px)';
+  setTimeout(() => {
+    card.style.transition = 'opacity .6s ease, transform .6s ease';
+    card.style.opacity    = '1';
+    card.style.transform  = 'translateX(0)';
+  }, 800 + i * 200);
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+console.log('%cATSify Loaded ✓', 'color:#a78bfa;font-family:monospace;font-size:14px;font-weight:bold;');
